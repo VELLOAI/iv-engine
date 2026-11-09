@@ -1,0 +1,29 @@
+# Pushes apps-script/ to Google Apps Script on every push to main that touches it.
+# Required repo secrets:
+#   CLASPRC_JSON          contents of ~/.clasprc.json after `clasp login` (Workspace account)
+#   APPS_SCRIPT_DEPLOYMENT_ID  web app deployment id (Apps Script → Deploy → Manage deployments)
+# Required file: .clasp.json at repo root (created by `clasp create ... --rootDir apps-script`)
+name: Deploy Apps Script
+on:
+  push:
+    branches: [main]
+    paths: ['apps-script/**', '.clasp.json', '.github/workflows/deploy-apps-script.yml']
+  workflow_dispatch:
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      DEPLOYMENT_ID: ${{ secrets.APPS_SCRIPT_DEPLOYMENT_ID }}   # secrets can't be used in `if:` directly
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm i -g @google/clasp
+      - name: Write clasp credentials
+        run: echo '${{ secrets.CLASPRC_JSON }}' > ~/.clasprc.json
+      - name: Check .clasp.json exists
+        run: test -f .clasp.json || (echo "Run 'clasp create --type webapp --title \"IV Engine\" --rootDir apps-script' locally and commit .clasp.json" && exit 1)
+      - run: clasp push -f
+      - name: Update web app deployment
+        if: ${{ env.DEPLOYMENT_ID != '' }}
+        run: clasp deploy -i "$DEPLOYMENT_ID" -d "GitHub ${{ github.sha }}"
