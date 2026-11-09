@@ -13,7 +13,7 @@ function sb_(method, path, body, prefer) {
   var opts = { method: method, headers: headers, muteHttpExceptions: true };
   if (body !== undefined) { opts.contentType = 'application/json'; opts.payload = JSON.stringify(body); }
 
-  var url = cfg_('SUPABASE_URL').replace(/\/$/, '') + '/rest/v1/' + path;
+  var url = supabaseBaseUrl_() + '/rest/v1/' + path;
   var res = UrlFetchApp.fetch(url, opts);
   var code = res.getResponseCode();
   var text = res.getContentText();
@@ -29,3 +29,11 @@ function sbUpsert_(table, rows, onConflict) {
   return sb_('post', table + '?on_conflict=' + onConflict, rows, 'resolution=merge-duplicates,return=minimal');
 }
 function eq_(v) { return 'eq.' + encodeURIComponent(v); }
+
+/** Accepts https://<ref>.supabase.co with or without a trailing slash or /rest/v1. */
+function supabaseBaseUrl_() {
+  var raw = String(cfg_('SUPABASE_URL')).trim();
+  var m = raw.match(/^https:\/\/[a-z0-9-]+\.supabase\.co/i);
+  if (!m) throw new Error('SUPABASE_URL should look like https://<project-ref>.supabase.co (got: ' + raw + ')');
+  return m[0];
+}
