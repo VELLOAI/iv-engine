@@ -1,0 +1,9 @@
+Pt First,Pt Last,Pt DOB,Ins Member #,Grp #,Primary Ins,Rendering NPI,Svc Type,CPT,DOS,Acct,Pay Type,Sub First,Sub Last,Sub DOB,Verified Active,Verified Plan,Verified Network,Copay,Coins %,Ded,Ded Met,OOP Max,Visit Max,Visits Used,Covered Amt,Auth Req,Verified Via,Mins
+Jane,Doe,01/01/1971,UHC123456,111222,United Healthcare,1999999984,Chiro,"98941, 97140",11/18/2026,A1001,Insurance,,,,Yes,Gold Plan HMO,In network,$15.00,0%,"$1,500.00","$1,500.00","$1,500.00",20,6,$40.00,No,Availity,12
+James,Jones,02/02/1991,23456789100,,Cigna,1999999984,Chiro,98940,11/18/2026,A1002,Insurance,,,,Yes,,In network,$25.00,,$500.00,$100.00,"$3,000.00",30,2,$38.00,No,Phone ref 55821,18
+Jane,Doe,04/04/2004,AETNA12345,,Aetna,1999999984,Chiro,98941,11/19/2026,A1003,Insurance,,,,Yes,,In network,,20%,"$1,000.00",$0.00,"$4,000.00",24,0,$42.00,Yes,Availity,9
+Jane,Doe,05/05/1975,HUMANA123,,Humana,1999999984,Chiro,98941,11/19/2026,A1004,Insurance,,,,Yes,,In network,$20.00,,$250.00,$250.00,"$2,500.00",12,4,$35.00,No,Availity,11
+Jane,Doe,01/01/1971,UHCINACTIVE,,UHC,1999999984,Chiro,98940,11/20/2026,A1005,Insurance,,,,No,,,,,,,,,,,,Availity,4
+Bad,Date,13/45/1990,UHC999,,UHC,1999999984,Chiro,,11/20/2026,A1006,Insurance,,,,,,,,,,,,,,,,,
+Blue,Cross,1980-03-03,XYZ123,,Blue Cross Blue Shield of Tennessee,1999999984,Chiro,,11/20/2026,A1007,Insurance,,,,,,,,,,,,,,,,,
+Cash,Patient,1985-06-06,,,,,Chiro,,11/20/2026,A1008,Cash,,,,,,,,,,,,,,,,,

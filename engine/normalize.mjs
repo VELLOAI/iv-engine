@@ -23,7 +23,8 @@ export const FIELD_KEYS = {
     'oop_max_total', 'oop_remaining',
     'visit_limit', 'prior_auth_required',
   ],
-  optional: ['group_number', 'plan_start', 'visits_used', 'carve_out_vendor', 'payer_messages'],
+  optional: ['group_number', 'plan_start', 'visits_used', 'carve_out_vendor', 'payer_messages',
+             'insurance_type', 'coverage_limit_amount', 'covered_amount'],
 };
 
 const AAA_CLASS = {
@@ -82,6 +83,7 @@ export function normalizeStediResponse(resp, { profile = 'chiro', serviceCodes }
   set('plan_name', field(plans.find((p) => p.name)?.name ?? planStatus?.planCoverageDescription, planStatus));
   set('group_number', field(body?.subscriber?.additionalInformation?.group?.number));
   set('plan_start', field(body?.subscriber?.dates?.plan?.start));
+  set('insurance_type', field(planStatus?.insuranceType));
 
   if (fields.coverage_active && fields.coverage_active.value === false) {
     return result('inactive_coverage', { errors, fields, gaps: [] });

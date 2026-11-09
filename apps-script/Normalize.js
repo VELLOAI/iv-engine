@@ -15,7 +15,8 @@ var FIELD_KEYS = {
   required: ['coverage_active', 'plan_name', 'network_status', 'copay', 'coinsurance',
              'deductible_total', 'deductible_remaining', 'oop_max_total', 'oop_remaining',
              'visit_limit', 'prior_auth_required'],
-  optional: ['group_number', 'plan_start', 'visits_used', 'carve_out_vendor', 'payer_messages']
+  optional: ['group_number', 'plan_start', 'visits_used', 'carve_out_vendor', 'payer_messages',
+             'insurance_type', 'coverage_limit_amount', 'covered_amount']
 };
 
 var AAA_CLASS_ = {
@@ -91,6 +92,7 @@ function normalizeStediResponse(resp, opts) {
   set('plan_name', field_(namedPlan ? namedPlan.name : g_(planStatus, 'planCoverageDescription'), planStatus));
   set('group_number', field_(g_(body, 'subscriber.additionalInformation.group.number')));
   set('plan_start', field_(g_(body, 'subscriber.dates.plan.start')));
+  set('insurance_type', field_(g_(planStatus, 'insuranceType')));
 
   if (fields.coverage_active && fields.coverage_active.value === false) {
     return nResult_('inactive_coverage', { errors: errors, fields: fields, gaps: [] });

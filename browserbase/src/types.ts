@@ -6,6 +6,7 @@ export const FIELD_KEYS = [
   "deductible_total", "deductible_remaining", "oop_max_total", "oop_remaining",
   "visit_limit", "prior_auth_required",
   "group_number", "plan_start", "visits_used", "carve_out_vendor", "payer_messages",
+  "insurance_type", "coverage_limit_amount", "covered_amount",
 ] as const;
 export type FieldKey = (typeof FIELD_KEYS)[number];
 
