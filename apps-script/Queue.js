@@ -9,6 +9,8 @@ function processQueue() {
   if (!lock.tryLock(1000)) { console.log('Previous run still going; skipping.'); return; }
   var started = Date.now();
   try {
+    if (stageEnabled_('browserbase')) pollBrowserbase_();   // finish portal lookups started earlier
+
     var queued = sbSelect_('verifications',
       'status=eq.queued&order=created_at.asc&limit=' + QUEUE_BATCH_SIZE + '&select=id');
     var done = 0;
@@ -60,14 +62,9 @@ function runStedi_(v) {
 
     writeFields_(v.id, attempt.id, n.fields);
 
-    var finished = r.nextStage === null;
-    sbUpdate_('verifications', 'id=' + eq_(v.id), {
-      status: r.status,
-      current_stage: finished ? 'stedi' : r.nextStage,
-      open_gaps: r.gaps,
-      summary: { text: plainSummary(n), outcome: n.outcome, reason: r.reason, errors: n.errors },
-      completed_at: finished ? new Date().toISOString() : null
-    });
+    // Error / inactive outcomes keep Stedi's own explanation; otherwise summarize all fields on file.
+    var stediText = (n.outcome === 'gaps' || n.outcome === 'complete') ? null : plainSummary(n);
+    advance_(v, r, playbook, { stage: 'stedi', summaryText: stediText, outcome: n.outcome, errors: n.errors });
   } catch (err) {
     console.error('Verification ' + v.id + ' failed: ' + (err && err.stack || err));
     if (attempt) sbUpdate_('verification_attempts', 'id=' + eq_(attempt.id),
@@ -107,4 +104,55 @@ function writeFields_(verificationId, attemptId, fields) {
 function requeueFailed() {
   var rows = sbUpdate_('verifications', 'status=eq.failed', { status: 'queued', current_stage: null });
   console.log('Re-queued ' + rows.length + ' verification(s).');
+}
+
+/**
+ * Apply a routing decision: start the next automated stage, or settle the verification.
+ * opts: { stage, summaryText, outcome, errors, note }
+ */
+function advance_(v, r, playbook, opts) {
+  opts = opts || {};
+  if (r.nextStage === 'browserbase') {
+    try { return startBrowserbase_(v, r.gaps, playbook); }
+    catch (err) {
+      console.error('Browserbase start failed for ' + v.id + ': ' + (err && err.message || err));
+      var gaps = currentGaps_(v.id);
+      r = route({ outcome: 'unknown_error', gaps: gaps, errors: [], fields: {} }, playbook, 'browserbase');
+      opts.note = 'Portal lookup could not start: ' + (err && err.message || err);
+    }
+  }
+  if (r.nextStage === 'retell') {
+    // Retell dispatch is the next build; until then gaps go to staff.
+    r = { status: 'needs_human', nextStage: 'human', gaps: r.gaps, reason: r.reason + ' (Retell stage not built yet → human)' };
+  }
+  var finished = r.nextStage === null;
+  var gapsNow = finished ? [] : r.gaps;
+  sbUpdate_('verifications', 'id=' + eq_(v.id), {
+    status: r.status,
+    current_stage: finished ? (opts.stage || 'stedi') : r.nextStage,
+    open_gaps: gapsNow,
+    summary: {
+      text: opts.summaryText || summaryFromDb_(v.id, gapsNow),
+      outcome: opts.outcome || (gapsNow.length ? 'gaps' : 'complete'),
+      reason: r.reason,
+      errors: opts.errors || [],
+      note: opts.note || null
+    },
+    completed_at: finished ? new Date().toISOString() : null
+  });
+}
+
+/** Required fields not yet answered by any stage. */
+function currentGaps_(verificationId) {
+  var have = sbSelect_('verification_fields', 'verification_id=' + eq_(verificationId) + '&select=field_key')
+    .map(function (r) { return r.field_key; });
+  return FIELD_KEYS.required.filter(function (k) { return have.indexOf(k) === -1; });
+}
+
+/** Plain-language summary built from every field on file (all stages). */
+function summaryFromDb_(verificationId, gaps) {
+  var rows = sbSelect_('verification_fields', 'verification_id=' + eq_(verificationId) + '&select=field_key,value');
+  var fields = {};
+  rows.forEach(function (r) { fields[r.field_key] = { value: r.value }; });
+  return plainSummary({ outcome: gaps.length ? 'gaps' : 'complete', fields: fields, gaps: gaps, errors: [] });
 }

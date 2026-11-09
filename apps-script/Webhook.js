@@ -55,20 +55,14 @@ function handleRetellResult_(verificationId, call) {
   });
   writeFields_(verificationId, attempt.id, fields);
 
-  // Recompute gaps from everything on file, across all stages.
-  var have = sbSelect_('verification_fields', 'verification_id=' + eq_(verificationId) + '&select=field_key')
-    .map(function (r) { return r.field_key; });
-  var gaps = FIELD_KEYS.required.filter(function (k) { return have.indexOf(k) === -1; });
-
+  var gaps = currentGaps_(verificationId);
   sbUpdate_('verification_attempts', 'id=' + eq_(attempt.id), {
     status: gaps.length ? 'partial' : 'succeeded', gaps_out: gaps, finished_at: new Date().toISOString()
   });
-  sbUpdate_('verifications', 'id=' + eq_(verificationId), {
-    status: gaps.length ? 'needs_human' : 'complete',
-    current_stage: gaps.length ? 'human' : 'retell',
-    open_gaps: gaps,
-    completed_at: gaps.length ? null : new Date().toISOString()
-  });
+  var full = sbSelect_('verifications', 'id=' + eq_(verificationId))[0];
+  var playbook = sbSelect_('payer_playbooks', 'stedi_payer_id=' + eq_(full.stedi_payer_id))[0] || null;
+  advance_(full, route({ outcome: gaps.length ? 'gaps' : 'complete', gaps: gaps, errors: [], fields: {} }, playbook, 'retell'),
+           playbook, { stage: 'retell' });
 }
 
 function json_(obj) {

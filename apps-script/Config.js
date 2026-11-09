@@ -5,6 +5,8 @@
  * Optional (enable later stages):
  *   RETELL_ENABLED = "true"       → gaps route to the Retell stage instead of the human queue
  *   BROWSERBASE_ENABLED = "true"  → gaps route to the Browserbase stage first
+ *     (also needs BROWSERBASE_API_KEY and BROWSERBASE_FUNCTION_ID, and the payer's playbook
+ *      to have portal_automation_enabled = true)
  */
 
 var STEDI_ELIGIBILITY_URL = 'https://healthcare.us.stedi.com/2026-06-01/eligibility-check';

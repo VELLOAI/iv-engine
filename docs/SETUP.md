@@ -54,8 +54,11 @@ Retell ──(webhook, follows 302)──► Apps Script web app doPost
 2. Within about 1 minute, Apps Script runs Stedi. The row moves to `running` with next stage `retell` and gaps `deductible_total, visit_limit, prior_auth_required`.
 3. Check `verification_attempts` and `verification_fields` in Supabase, and the result card in Lovable.
 
+## Step 6. Browserbase portal stage (optional; mock portal for now)
+See `browserbase/README.md`: `npm run test:local` → `npx bb publish index.ts` → run migration 002 → set `BROWSERBASE_API_KEY`, `BROWSERBASE_FUNCTION_ID`, `BROWSERBASE_ENABLED=true` in Script Properties.
+
 ## Constraints to design around
-- **Browserbase can't run inside Apps Script.** Driving a browser needs a runtime that holds a live connection, which Apps Script can't do. Run that one stage in a small Supabase Edge Function or a Browserbase-hosted function, called by Apps Script.
+- **Browserbase runs as a Browserbase Function** (`browserbase/`), because Apps Script can't hold a live browser connection. Apps Script starts it over the API and checks back on the next 1-minute runs.
 - **Apps Script limits:** 6 minutes max per run (process the queue with a time budget of about 4.5 min). No `fetch` or imports, so `engine/` gets ported to `UrlFetchApp`.
 - **302 redirect:** Apps Script web apps redirect POSTs. Retell follows the redirect; curl doesn't. Test with in-editor functions.
 - **Secrets:** the service_role and Stedi keys live only in Script Properties. The anon key is the only key Lovable gets.
