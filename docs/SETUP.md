@@ -33,8 +33,9 @@ Retell ──(webhook, follows 302)──► Apps Script web app doPost
 3. Create the project at script.google.com → New project → rename it "IV Engine". Copy the Script ID (Project Settings).
 4. At the repo root, create `.clasp.json` containing `{"scriptId":"<SCRIPT_ID>","rootDir":"apps-script"}`. The ID isn't secret, so commit it. Then run `clasp push -f`.
 5. Apps Script editor → Project Settings → **Script Properties**: `STEDI_API_KEY`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `WEBHOOK_SECRET` (a random string Retell sends as a query param, because Apps Script web apps can't read custom headers).
-6. Triggers → **time-driven, every 1 minute** → `processQueue`. It picks up `queued` verifications. Polling avoids the 302 redirect that Supabase database webhooks would hit.
-7. Deploy → New deployment → Web app → Execute as: me; Access: anyone. The URL plus `?secret=…` is the Retell webhook.
+6. In the editor, run `testConfig`, `testStediMock`, `seedMockVerification`, then `processQueue` (see `apps-script/README.md`). The first run asks for permissions.
+7. Triggers → **time-driven, every 1 minute** → `processQueue`. It picks up `queued` verifications. Polling avoids the 302 redirect that Supabase database webhooks would hit.
+8. Deploy → New deployment → Web app → Execute as: me; Access: anyone. The URL plus `?secret=…` is the Retell webhook.
 
 ## Step 3. Auto-deploy from GitHub
 1. `cat ~/.clasprc.json` → this repo → Settings → Secrets and variables → Actions → secret **`CLASPRC_JSON`** (paste the whole file).
