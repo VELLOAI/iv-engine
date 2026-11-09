@@ -70,3 +70,48 @@ function checkEligibility(body, opts) {
   }
   return { ok: last.ok, httpStatus: last.httpStatus, body: last.body, tries: tries, elapsedMs: Date.now() - started };
 }
+
+/**
+ * Resolve a free-text insurance name ("BCBS of TN") to a Stedi payer ID using the
+ * Search Payers API, then save it as a payer playbook (+ alias) so the next import with the
+ * same name matches locally. Returns the payer ID, or null if nothing usable came back.
+ * Note: Search Payers is a paid-plan Stedi endpoint; on a plan without it this returns null.
+ */
+var STEDI_PAYER_SEARCH_URL = 'https://healthcare.us.stedi.com/2024-04-01/payers/search';
+
+function resolvePayer_(rawName) {
+  if (!rawName) return null;
+  var known = sbSelect_('payer_playbooks', 'select=stedi_payer_id,name,aliases');
+  var lower = String(rawName).trim().toLowerCase();
+  for (var i = 0; i < known.length; i++) {
+    var aliases = (known[i].aliases || []).map(function (a) { return String(a).toLowerCase(); });
+    if (String(known[i].name).toLowerCase() === lower || aliases.indexOf(lower) !== -1) return known[i].stedi_payer_id;
+  }
+  try {
+    var res = UrlFetchApp.fetch(STEDI_PAYER_SEARCH_URL + '?query=' + encodeURIComponent(rawName), {
+      method: 'get', headers: { Authorization: cfg_('STEDI_API_KEY') }, muteHttpExceptions: true
+    });
+    if (res.getResponseCode() >= 300) { console.log('Payer search ' + res.getResponseCode() + ': ' + res.getContentText().slice(0, 200)); return null; }
+    var items = (JSON.parse(res.getContentText()).items || []);
+    var top = items[0] && items[0].payer;
+    if (!top || !top.primaryPayerId) return null;
+    var id = String(top.primaryPayerId);
+    var existing = sbSelect_('payer_playbooks', 'stedi_payer_id=' + eq_(id) + '&select=id,aliases')[0];
+    if (existing) {
+      var al = existing.aliases || [];
+      if (al.map(function (a) { return String(a).toLowerCase(); }).indexOf(lower) === -1) {
+        sbUpdate_('payer_playbooks', 'id=' + eq_(existing.id), { aliases: al.concat([String(rawName).trim()]) });
+      }
+    } else {
+      sbInsert_('payer_playbooks', {
+        stedi_payer_id: id, name: top.displayName || String(rawName).trim(), portal_type: 'none',
+        aliases: [String(rawName).trim()],
+        notes: 'Auto-added from import: "' + String(rawName).trim() + '" → Stedi ' + (top.stediId || '') + '. Review.'
+      });
+    }
+    return id;
+  } catch (err) {
+    console.error('resolvePayer_: ' + (err && err.message || err));
+    return null;
+  }
+}

@@ -32,6 +32,24 @@ function processQueue() {
 function runStedi_(v) {
   var attempt = null;
   try {
+    // Imports may carry only a raw insurance name; resolve it to a payer ID first.
+    if (!v.stedi_payer_id) {
+      var resolved = resolvePayer_(v.payer_name_raw);
+      if (!resolved) {
+        sbInsert_('verification_attempts', { verification_id: v.id, stage: 'stedi', status: 'data_error',
+          error_codes: ['PAYER_UNRESOLVED'], finished_at: new Date().toISOString() });
+        sbUpdate_('verifications', 'id=' + eq_(v.id), {
+          status: 'needs_practice_data', current_stage: 'human', open_gaps: FIELD_KEYS.required,
+          summary: { text: 'Couldn\'t identify the insurance company "' + v.payer_name_raw + '". Choose the payer and retry.',
+                     outcome: 'patient_data_error', errors: [{ code: 'PAYER', description: 'Insurance company not recognized' }] }
+        });
+        return;
+      }
+      var pbRow = sbSelect_('payer_playbooks', 'stedi_payer_id=' + eq_(resolved) + '&select=id')[0];
+      sbUpdate_('verifications', 'id=' + eq_(v.id), { stedi_payer_id: resolved, payer_playbook_id: pbRow ? pbRow.id : null });
+      v.stedi_payer_id = resolved;
+    }
+
     var provider = sbSelect_('providers', 'id=' + eq_(v.provider_id) + '&select=npi,name')[0];
     if (!provider) throw new Error('Provider not found: ' + v.provider_id);
     var playbook = sbSelect_('payer_playbooks', 'stedi_payer_id=' + eq_(v.stedi_payer_id))[0] || null;

@@ -1,0 +1,6 @@
+First Name,Last Name,Date of Service,Date of birth,Office,Billed Amount,Adjustment,Amount Paid,Total Balance,Primary Insurance,Patient Status,Insurance Name
+Jane,Doe,11/18/2026,01/01/1971,Mill Valley,$120.00,$40.00,$65.00,$15.00,United Health Care,Active,UnitedHealthcare Choice Plus
+James,Jones,11/18/2026,02/02/1991,Mill Valley,$120.00,$45.00,$50.00,$25.00,Cigna,Active,Cigna Open Access
+Jane,Doe,11/19/2026,05/05/1975,Mill Valley,$95.00,$30.00,$45.00,$20.00,Humana,Active,Humana Gold Plus
+Tom,Lee,11/19/2026,03/03/1980,Mill Valley,$95.00,$0.00,$0.00,$95.00,BCBS of TN,Active,BlueCross BlueShield of Tennessee
+Pat,Smith,11/20/2026,07/07/1988,Mill Valley,$80.00,$0.00,$80.00,$0.00,Self Pay,Active,
