@@ -81,6 +81,7 @@ var STEDI_PAYER_SEARCH_URL = 'https://healthcare.us.stedi.com/2024-04-01/payers/
 
 function resolvePayer_(rawName) {
   if (!rawName) return null;
+  if (/^(self[\s-]?pay|cash|private pay|none|no insurance|uninsured|n\/?a)$/i.test(String(rawName).trim())) return null;
   var known = sbSelect_('payer_playbooks', 'select=stedi_payer_id,name,aliases');
   var lower = String(rawName).trim().toLowerCase();
   for (var i = 0; i < known.length; i++) {
