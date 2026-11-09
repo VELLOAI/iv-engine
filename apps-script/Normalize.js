@@ -160,7 +160,7 @@ function nResult_(outcome, o) {
 /** Plain-language one-liner for the UI / chart note. */
 function plainSummary(n) {
   var f = function (k) { return n.fields[k] ? n.fields[k].value : undefined; };
-  var money = function (v) { return v === undefined ? '?' : '$' + v; };
+  var money = function (v) { return v === undefined ? '?' : '$' + Number(v).toLocaleString('en-US'); };
   var descs = n.errors.map(function (e) { return e.description; }).join('; ');
   switch (n.outcome) {
     case 'inactive_coverage': return 'INACTIVE coverage' + (f('plan_name') ? ' (' + f('plan_name') + ')' : '') + '. Collect self-pay or new insurance.';
@@ -178,8 +178,8 @@ function plainSummary(n) {
     'copay ' + money(f('copay')),
     f('coinsurance') !== undefined ? 'coinsurance ' + f('coinsurance') + '%' : null,
     'deductible ' + money(f('deductible_remaining')) + ' remaining of ' + money(f('deductible_total')),
-    f('visit_limit') !== undefined ? 'visit limit ' + f('visit_limit') : null,
-    f('prior_auth_required') === true ? 'PRIOR AUTH REQUIRED' : null,
+    f('visit_limit') !== undefined ? 'visit limit ' + f('visit_limit') + (f('visits_used') !== undefined ? ' (' + f('visits_used') + ' used)' : '') : null,
+    f('prior_auth_required') === true ? 'PRIOR AUTH REQUIRED' : (f('prior_auth_required') === false ? 'no prior auth' : null),
     f('carve_out_vendor') ? 'benefits managed by ' + f('carve_out_vendor') : null
   ].filter(Boolean);
   return parts.join(' · ') + (n.gaps.length ? ' · still verifying: ' + n.gaps.join(', ') : '');
