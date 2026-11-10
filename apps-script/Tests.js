@@ -54,3 +54,13 @@ function testRetellWebhook() {
   });
   console.log(res.getContent());
 }
+
+/** Shows what the daily recap email would say for each clinic with settings. Sends nothing. */
+function previewRecapEmail() {
+  var now = new Date();
+  sbSelect_('notification_settings', 'select=practice_id,recipients,practices(name,timezone)').forEach(function (s) {
+    var m = practiceRecap_(s.practice_id, new Date(now.getTime() - 24 * 3600 * 1000), now);
+    var mail = recapEmail_(m, appUrl_(), (s.practices && s.practices.timezone) || 'America/New_York', now);
+    console.log('To: ' + s.recipients.join(', ') + '\nSubject: ' + mail.subject + '\n\n' + mail.text);
+  });
+}
