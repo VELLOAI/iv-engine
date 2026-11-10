@@ -1,0 +1,7 @@
+First Name,Last Name,Date of Service,Date of birth,Office,Primary Insurance,Member ID,Group Number,Billed Amount,Patient Status,Verified Active,Verified Copay,Verified Deductible,Verified Deductible Met,Verified OOP Max,Verified Visit Limit,Verified Visits Used,Verified Auth Required,Verified How,Minutes Spent
+Jane,Doe,11/18/2026,01/01/1971,Mill Valley,United Health Care,UHC123456,111222,$120.00,Active,Yes,$15.00,"$1,500.00","$1,500.00","$1,500.00",20,6,No,Availity,12
+James,Jones,11/18/2026,02/02/1991,Mill Valley,Cigna,23456789100,,$120.00,Active,Yes,$25.00,$500.00,$100.00,"$3,000.00",30,2,No,Phone,18
+Jane,Doe,11/19/2026,04/04/2004,Mill Valley,Aetna,AETNA12345,,$95.00,Active,Yes,,"$1,000.00",$0.00,"$4,000.00",24,0,Yes,Availity,9
+Jane,Doe,11/19/2026,05/05/1975,Mill Valley,Humana,HUMANA123,,$95.00,Active,Yes,$20.00,$250.00,$250.00,"$2,500.00",12,4,No,Availity,11
+Jane,Doe,11/20/2026,01/01/1971,Mill Valley,UHC,UHCINACTIVE,,$80.00,Active,No,,,,,,,,Availity,4
+Pat,Smith,11/20/2026,07/07/1988,Mill Valley,Self Pay,,,$80.00,Active,,,,,,,,,,
