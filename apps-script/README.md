@@ -16,7 +16,7 @@ Google Apps Script source. `clasp push` uploads this folder, and the GitHub Acti
 | `Tests.js` | In-editor tests: `testConfig`, `testStediMock`, `seedMockVerification`, `testRetellWebhook`, `previewRecapEmail` |
 
 **Script Properties (required):** `STEDI_API_KEY`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `WEBHOOK_SECRET`
-**Email (migration 008):** `RESEND_API_KEY`, `NOTIFY_FROM` (e.g. `ClearCover <reports@yourdomain.com>`, domain verified in Resend), `APP_URL`. Then run `installNotificationTrigger` once. `previewRecapEmail` logs what each clinic would get.
+**Email (migration 008):** `RESEND_API_KEY`, `NOTIFY_FROM` (e.g. `Eligo <reports@eligohealth.com>`, domain verified in Resend), `APP_URL`. Then run `installNotificationTrigger` once. `previewRecapEmail` logs what each clinic would get.
 **Optional switches:** `BROWSERBASE_ENABLED=true` (+ `BROWSERBASE_API_KEY`, `BROWSERBASE_FUNCTION_ID`), `RETELL_ENABLED=true` (Retell dispatch not built yet; gaps go to staff). Until these are set, gaps go to the human queue (`needs_human`).
 
 ## First run (in the editor)

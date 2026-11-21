@@ -7,7 +7,7 @@
  *
  * Script Properties:
  *   RESEND_API_KEY   re_...            (required to send; without it every send is logged as skipped)
- *   NOTIFY_FROM      ClearCover <reports@yourdomain.com>   (domain must be verified in Resend;
+ *   NOTIFY_FROM      Eligo <reports@eligohealth.com>   (domain must be verified in Resend;
  *                    until then Resend only delivers from onboarding@resend.dev to the account owner)
  *   APP_URL          https://velloai-ins-verify.lovable.app
  */
@@ -106,7 +106,7 @@ function logNotification_(practiceId, kind, status, to, subject, metrics, error)
 function sendEmail_(to, mail) {
   var key = cfg_('RESEND_API_KEY', false);
   if (!key) return { ok: false, skipped: true, error: 'RESEND_API_KEY not set' };
-  var from = cfg_('NOTIFY_FROM', false) || 'ClearCover <onboarding@resend.dev>';
+  var from = cfg_('NOTIFY_FROM', false) || 'Eligo <onboarding@resend.dev>';
   var res = UrlFetchApp.fetch('https://api.resend.com/emails', {
     method: 'post', contentType: 'application/json', muteHttpExceptions: true,
     headers: { Authorization: 'Bearer ' + key },
@@ -164,7 +164,7 @@ function recapEmail_(m, appUrl, tz, now) {
     : { href: appUrl + '/verifications', label: 'Open dashboard' };
 
   var text = [
-    'ClearCover daily pulse — ' + clinic + ' — ' + dateLabel, '',
+    'Eligo daily pulse — ' + clinic + ' — ' + dateLabel, '',
     verified + ' of ' + finished + ' patients verified in the last 24 hours.',
     open ? open + ' need your attention: ' + cta.href : 'Nothing needs your attention.',
     working ? working + ' still being checked.' : '',
@@ -192,7 +192,7 @@ function recapEmail_(m, appUrl, tz, now) {
   var html =
     '<div style="background:#F5F7FB;padding:24px 0;font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif;color:#141B2D;">' +
     '<table role="presentation" width="100%" style="max-width:560px;margin:0 auto;background:#fff;border-radius:16px;padding:28px;">' +
-    '<tr><td style="font-size:13px;letter-spacing:3px;color:#141B2D;">CLEAR<span style="color:#2F6FDE;">COVER</span></td></tr>' +
+    '<tr><td style="font-size:13px;letter-spacing:3px;color:#141B2D;"><span style="color:#2F6FDE;font-weight:700;">ELIGO</span></td></tr>' +
     '<tr><td style="padding-top:18px;font-size:13px;color:#5B6478;">Daily pulse · ' + esc_(dateLabel) + '</td></tr>' +
     '<tr><td style="font-size:22px;font-weight:700;padding-top:4px;">' + esc_(clinic) + '</td></tr>' +
     '<tr><td style="padding-top:20px;"><table role="presentation" width="100%" style="border-spacing:8px 0;"><tr>' +
@@ -226,7 +226,7 @@ function attentionEmail_(m, appUrl) {
   var html =
     '<div style="background:#F5F7FB;padding:24px 0;font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif;color:#141B2D;">' +
     '<table role="presentation" width="100%" style="max-width:560px;margin:0 auto;background:#fff;border-radius:16px;padding:28px;">' +
-    '<tr><td style="font-size:13px;letter-spacing:3px;">CLEAR<span style="color:#2F6FDE;">COVER</span></td></tr>' +
+    '<tr><td style="font-size:13px;letter-spacing:3px;"><span style="color:#2F6FDE;font-weight:700;">ELIGO</span></td></tr>' +
     '<tr><td style="font-size:22px;font-weight:700;padding-top:18px;">' + esc_(plural_(open, 'patient')) + ' need' + (open === 1 ? 's' : '') + ' your attention</td></tr>' +
     '<tr><td style="padding-top:8px;font-size:14px;color:#2A3247;line-height:1.6;">' + esc_(clinic) + ' · ' + fresh +
       ' new since the last alert. Usually a missing member ID, a payer we couldn\'t reach, or inactive coverage.</td></tr>' +
