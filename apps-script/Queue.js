@@ -6,7 +6,10 @@
 
 function processQueue() {
   var lock = LockService.getScriptLock();
-  if (!lock.tryLock(1000)) { console.log('Previous run still going; skipping.'); return; }
+  var got;
+  try { got = lock.tryLock(1000); }
+  catch (e) { if (isTransient_(e)) { console.warn('Lock service blip; skipping this minute.'); return; } throw e; }
+  if (!got) { console.log('Previous run still going; skipping.'); return; }
   var started = Date.now();
   try {
     if (stageEnabled_('browserbase')) pollBrowserbase_();   // finish portal lookups started earlier
@@ -24,6 +27,9 @@ function processQueue() {
       done++;
     }
     console.log('processQueue: ' + done + ' verification(s) processed in ' + (Date.now() - started) + ' ms');
+  } catch (e) {
+    if (!isTransient_(e)) throw e;
+    console.warn('processQueue: temporary Google/Supabase network error, will retry next minute: ' + e.message);
   } finally {
     lock.releaseLock();
   }

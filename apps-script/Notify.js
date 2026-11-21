@@ -26,6 +26,9 @@ function runNotifications() {
       try { notifyPractice_(s, new Date()); }
       catch (e) { console.error('Notify ' + s.practice_id + ': ' + e.message); }
     });
+  } catch (e) {
+    if (!isTransient_(e)) throw e;
+    console.warn('runNotifications: temporary network error, will retry in 5 minutes: ' + e.message);
   } finally { lock.releaseLock(); }
 }
 

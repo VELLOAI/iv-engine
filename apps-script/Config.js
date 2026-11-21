@@ -15,8 +15,27 @@ var QUEUE_BATCH_SIZE = 10;          // verifications claimed per trigger run
 var RUN_TIME_BUDGET_MS = 270000;    // stop starting new work after 4.5 min (Apps Script hard limit is 6)
 var STEDI_RETRY_WINDOW_MS = 120000; // Stedi guidance: retry payer outages for up to ~2 min
 
+// Google-side blips seen in production (Nov 20): "Address unavailable" from UrlFetchApp and
+// "a server error occurred while reading from storage" from PropertiesService. Both clear on retry.
+var TRANSIENT_ERROR_RE_ = /Address unavailable|DNS error|timed out|Timeout|server error occurred|Service invoked too many times|Bandwidth quota|temporarily unavailable/i;
+
+function isTransient_(e) { return TRANSIENT_ERROR_RE_.test(String(e && e.message || e)); }
+
+/** Runs fn, retrying up to 3 times (1s, 2s, 4s) when Google reports a transient failure. */
+function withRetry_(fn) {
+  for (var i = 0; ; i++) {
+    try { return fn(); }
+    catch (e) {
+      if (i >= 3 || !isTransient_(e)) throw e;
+      Utilities.sleep(1000 * Math.pow(2, i));
+    }
+  }
+}
+
+var PROPS_CACHE_ = null;
 function cfg_(key, required) {
-  var v = PropertiesService.getScriptProperties().getProperty(key);
+  if (!PROPS_CACHE_) PROPS_CACHE_ = withRetry_(function () { return PropertiesService.getScriptProperties().getProperties(); });
+  var v = PROPS_CACHE_[key];
   if (required !== false && !v) throw new Error('Missing Script Property: ' + key);
   return v;
 }

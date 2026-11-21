@@ -14,8 +14,13 @@ function sb_(method, path, body, prefer) {
   if (body !== undefined) { opts.contentType = 'application/json'; opts.payload = JSON.stringify(body); }
 
   var url = supabaseBaseUrl_() + '/rest/v1/' + path;
-  var res = UrlFetchApp.fetch(url, opts);
+  var res = withRetry_(function () { return UrlFetchApp.fetch(url, opts); });
   var code = res.getResponseCode();
+  if (code >= 500 && method === 'get') {          // Supabase/Cloudflare hiccup: one more try for reads
+    Utilities.sleep(1500);
+    res = withRetry_(function () { return UrlFetchApp.fetch(url, opts); });
+    code = res.getResponseCode();
+  }
   var text = res.getContentText();
   if (code >= 300) throw new Error('Supabase ' + method + ' ' + path.split('?')[0] + ' → ' + code + ': ' + text.slice(0, 500));
   return text ? JSON.parse(text) : null;
